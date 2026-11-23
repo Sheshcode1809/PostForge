@@ -40,6 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(authMiddleware as any);
 
 app.use("/api", router);
+app.use(router);
 
 app.use(
   (

@@ -45,21 +45,29 @@ interface DatabaseSchema {
 const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
 
-// Safe file-based persistent store location
-const DATA_DIR = path.resolve(process.cwd(), ".data");
+// Safe persistent store location (using /tmp on serverless/Vercel)
+const DATA_DIR = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
+  ? path.resolve("/tmp", ".postforge_data")
+  : path.resolve(process.cwd(), ".data");
 const DB_FILE = path.resolve(DATA_DIR, "db_store.json");
 
+let memoryCache: DatabaseSchema | null = null;
+
 function ensureStore(): DatabaseSchema {
+  if (memoryCache) {
+    return memoryCache;
+  }
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, "utf-8");
-      return JSON.parse(content);
+      memoryCache = JSON.parse(content);
+      return memoryCache!;
     }
   } catch (err) {
-    console.warn("Error reading db_store.json, creating clean store:", err);
+    console.warn("Notice: accessing persistent store:", err);
   }
 
   const emptyStore: DatabaseSchema = {
@@ -68,17 +76,19 @@ function ensureStore(): DatabaseSchema {
     drafts: {},
   };
   saveStore(emptyStore);
+  memoryCache = emptyStore;
   return emptyStore;
 }
 
 function saveStore(data: DatabaseSchema) {
+  memoryCache = data;
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
-    console.error("Failed to write db_store.json:", err);
+    // In serverless, memoryCache retains state for warm invocations
   }
 }
 
