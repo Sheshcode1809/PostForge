@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "moduleResolution": "bundler",
+    "paths": {
+      "@workspace/api-zod": ["../../lib/api-zod/src/index.ts"],
+      "@workspace/integrations-openai-ai-server": ["../../lib/integrations-openai-ai-server/src/index.ts"],
+      "@workspace/db": ["../../lib/db/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

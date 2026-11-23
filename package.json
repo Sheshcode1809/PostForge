@@ -1,0 +1,15 @@
+{
+  "name": "linkedin-post-generator",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @workspace/api-server --filter @workspace/linkedin-generator --parallel run dev",
+    "start": "pnpm dev",
+    "typecheck": "pnpm --filter @workspace/api-server --filter @workspace/linkedin-generator run typecheck",
+    "dev:frontend": "pnpm --filter @workspace/linkedin-generator run dev",
+    "dev:api": "pnpm --filter @workspace/api-server run dev",
+    "build:frontend": "pnpm --filter @workspace/linkedin-generator run build",
+    "build:api": "pnpm --filter @workspace/api-server run build",
+    "build": "pnpm run build:api && pnpm run build:frontend"
+  }
+}
